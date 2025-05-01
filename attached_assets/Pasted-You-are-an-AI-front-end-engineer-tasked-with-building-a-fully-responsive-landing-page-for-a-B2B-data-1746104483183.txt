@@ -1,0 +1,58 @@
+You are an AI front-end engineer tasked with building a fully responsive landing page for a B2B data-service startup. The page must be implemented in React (create-react-app or Next.js), styled with Tailwind CSS, and use a strict grayscale color palette (black, white, and shades of gray only). Don’t add any other colors.
+
+Structure your code into clear, reusable components for each of the following sections—wrapping them in a top-level `<LandingPage>` component:
+
+1. **HeroSection**  
+   - Full-viewport height.  
+   - Headline: “Enterprise-Grade Data, Zero Risk.”  
+   - Subheadline: “On-demand, fully compliant datasets—collected, validated, encrypted, and delivered by security-first experts.”  
+   - Two buttons: “Get Your Free Preview” (primary style) and “Speak with a Data Specialist” (secondary style).  
+   - Background: subtle grayscale gradient or image overlay.
+
+2. **HowItWorks**  
+   - Four horizontally or vertically aligned steps.  
+   - Step titles and descriptions as provided.  
+   - Include simple numbered icons or bullets styled in gray.
+
+3. **IndustriesServed**  
+   - Display four industry cards (Healthcare & Pharma, Banking & Insurance, Legal & Compliance, Market Research).  
+   - Each card includes an icon or emoji (in gray), a heading, and one line of example use case.  
+   - Include the testimonial quote (“With their data powering our analytics, we cut compliance-related incidents by 35%.”) under the heading.
+
+4. **SampleDatasetPreview**  
+   - Two-column layout: left: short description/benefits, right: two CTA buttons (“Request Preview” and “Submit Custom Brief”).  
+   - Enclose the schema preview “lock” icon in gray.
+
+5. **SecurityCompliance**  
+   - List of four bullet-points with icons:  
+     • AES-256 at rest, TLS 1.3 in transit, RBAC  
+     • GDPR, HIPAA, CCPA, ISO 27001  
+     • Pseudonymization, k-anonymity, secure enclaves  
+     • Real-time logs, SOC 2 reports, compliance dossiers
+
+6. **WhyChooseUs**  
+   - Vertical list of five differentiators, each prefixed by a gray checkmark icon.  
+   - Use concise benefit-driven copy.
+
+7. **FAQs**  
+   - Accordion component with the four Q&A pairs.
+
+8. **ContactCTA**  
+   - Centered call-to-action:  
+     “Ready to Transform Your Data Strategy?”  
+     Buttons: “Schedule a 15-Minute Call” and “Get Free Preview.”
+
+9. **Footer**  
+   - Simple footer with text links: About • Security & Compliance • Terms of Service • Privacy Policy • Careers • Blog  
+   - Social icons for LinkedIn, Twitter, Email (all in gray).
+
+**Technical requirements:**  
+- Use functional React components and hooks only.  
+- All styling via Tailwind CSS utility classes.  
+- Mobile-first, fully responsive design.  
+- Semantic HTML (use `<header>`, `<section>`, `<footer>`, etc.).  
+- Export a single `LandingPage` component that renders each section in order.  
+- No external images or colors outside grayscale—use placeholder SVGs or emojis for icons.  
+- Include comments at the top of each component summarizing its purpose.
+
+Generate the initial code structure and component stubs with placeholder text/content. Once the scaffold is ready, fill in all the copy exactly as defined in our section outlines above.  
