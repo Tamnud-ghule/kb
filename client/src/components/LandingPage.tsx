@@ -1,0 +1,34 @@
+/**
+ * LandingPage component - Main container for the B2B data-service landing page
+ * Renders all section components in sequence for a complete, responsive landing page
+ */
+import React from 'react';
+import Navbar from '@/components/landing/Navbar';
+import HeroSection from '@/components/landing/HeroSection';
+import HowItWorks from '@/components/landing/HowItWorks';
+import IndustriesServed from '@/components/landing/IndustriesServed';
+import SampleDatasetPreview from '@/components/landing/SampleDatasetPreview';
+import SecurityCompliance from '@/components/landing/SecurityCompliance';
+import WhyChooseUs from '@/components/landing/WhyChooseUs';
+import FAQs from '@/components/landing/FAQs';
+import ContactCTA from '@/components/landing/ContactCTA';
+import Footer from '@/components/landing/Footer';
+
+const LandingPage: React.FC = () => {
+  return (
+    <div className="min-h-screen flex flex-col antialiased">
+      <Navbar />
+      <HeroSection />
+      <HowItWorks />
+      <IndustriesServed />
+      <SampleDatasetPreview />
+      <SecurityCompliance />
+      <WhyChooseUs />
+      <FAQs />
+      <ContactCTA />
+      <Footer />
+    </div>
+  );
+};
+
+export default LandingPage;
