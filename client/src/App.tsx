@@ -34,6 +34,7 @@ function Router() {
         
         {/* Marketplace routes - protected */}
         <ProtectedRoute path="/marketplace" component={MarketplaceHome} />
+        <ProtectedRoute path="/home" component={MarketplaceHome} />
         <ProtectedRoute path="/datasets" component={Datasets} />
         <ProtectedRoute path="/categories" component={Categories} />
         <ProtectedRoute path="/dataset/:id" component={Dataset} />

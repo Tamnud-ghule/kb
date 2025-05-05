@@ -10,27 +10,10 @@ import { formatDistanceToNow } from 'date-fns';
 
 interface Purchase {
   id: number;
-  userId: number;
   datasetId: number;
-  amount: number;
-  encryptionKey: string;
-  createdAt: string;
-  dataset: {
-    id: number;
-    title: string;
-    slug: string;
-    description: string;
-    price: number;
-    recordCount: number;
-    dataFormat: string;
-    lastUpdated: string;
-    categoryId: number;
-    category: {
-      id: number;
-      name: string;
-      slug: string;
-    };
-  };
+  title: string;
+  price: number;
+  purchaseDate: string;
 }
 
 export default function Purchases() {
@@ -74,48 +57,29 @@ export default function Purchases() {
           {purchases.map((purchase) => (
             <Card key={purchase.id} className="overflow-hidden">
               <CardHeader>
-                <CardTitle className="line-clamp-1">{purchase.dataset.title}</CardTitle>
+                <CardTitle className="line-clamp-1">{purchase.title}</CardTitle>
                 <CardDescription>
-                  Purchased {formatDistanceToNow(new Date(purchase.createdAt), { addSuffix: true })}
+                  Purchased {formatDistanceToNow(new Date(purchase.purchaseDate), { addSuffix: true })}
                 </CardDescription>
               </CardHeader>
               
               <CardContent>
-                <div className="space-y-4">
-                  <p className="text-sm text-gray-700 line-clamp-2">{purchase.dataset.description}</p>
-                  
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline" className="flex items-center gap-1 font-normal">
-                      <Database className="h-3 w-3" />
-                      {purchase.dataset.recordCount.toLocaleString()} records
-                    </Badge>
-                    
-                    <Badge variant="outline" className="flex items-center gap-1 font-normal">
-                      <FileText className="h-3 w-3" />
-                      {purchase.dataset.dataFormat}
-                    </Badge>
-                    
-                    <Badge variant="outline" className="flex items-center gap-1 font-normal">
-                      <Calendar className="h-3 w-3" />
-                      Updated {formatDistanceToNow(new Date(purchase.dataset.lastUpdated), { addSuffix: true })}
-                    </Badge>
-                  </div>
-                  
+                <div className="space-y-4">                  
                   <p className="text-sm font-medium text-gray-700">
-                    Purchase amount: ${purchase.amount.toFixed(2)}
+                    Purchase amount: ${purchase.price.toFixed(2)}
                   </p>
                 </div>
               </CardContent>
               
               <CardFooter className="flex justify-between">
                 <Button variant="outline" asChild>
-                  <Link href={`/dataset/${purchase.dataset.id}`}>
+                  <Link href={`/dataset/${purchase.datasetId}`}>
                     View Details
                   </Link>
                 </Button>
                 
                 <Button asChild>
-                  <Link href={`/api/download/${purchase.dataset.id}`} target="_blank">
+                  <Link href={`/download/${purchase.datasetId}`}>
                     <Download className="h-4 w-4 mr-2" />
                     Download
                   </Link>
