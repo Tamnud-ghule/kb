@@ -6,36 +6,36 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MarketplaceHeader: React.FC = () => {
-  const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, this would navigate to search results
-    console.log('Searching for:', searchQuery);
-  };
+  const [location] = useLocation();
+  const isMobile = useIsMobile();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    // In a real app, this would redirect to search results
+    console.log('Search query:', searchQuery);
+  };
+
   const navItems = [
-    { label: 'Home', href: '/' },
-    { label: 'Datasets', href: '/datasets' },
-    { label: 'Categories', href: '/categories' },
-    { label: 'Compliance', href: '/compliance' },
-    { label: 'Custom Solutions', href: '/custom-solutions' },
+    { href: '/marketplace', label: 'Home' },
+    { href: '/datasets', label: 'Datasets' },
+    { href: '/categories', label: 'Categories' },
+    { href: '/support', label: 'Support' },
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="bg-white shadow-sm border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
         <div className="flex justify-between h-16">
-          {/* Logo and primary nav */}
-          <div className="flex">
+          <div className="flex px-2 lg:px-0">
             <div className="flex-shrink-0 flex items-center">
               <Link href="/">
                 <span className="text-2xl font-bold text-gray-900 cursor-pointer">DataSecure</span>

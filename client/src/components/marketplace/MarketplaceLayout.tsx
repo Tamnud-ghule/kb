@@ -12,9 +12,9 @@ interface MarketplaceLayoutProps {
 
 const MarketplaceLayout: React.FC<MarketplaceLayoutProps> = ({ children }) => {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="flex flex-col min-h-screen">
       <MarketplaceHeader />
-      <main className="flex-grow">
+      <main className="flex-grow bg-white">
         {children}
       </main>
       <MarketplaceFooter />
