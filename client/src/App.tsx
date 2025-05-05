@@ -16,6 +16,10 @@ import Datasets from "@/pages/marketplace/Datasets";
 import Dataset from "@/pages/marketplace/Dataset";
 import CategoryPage from "@/pages/marketplace/CategoryPage";
 import Categories from "@/pages/marketplace/Categories";
+import Cart from "@/pages/marketplace/Cart";
+import Purchases from "@/pages/marketplace/Purchases";
+import ApiKey from "@/pages/marketplace/ApiKey";
+import Profile from "@/pages/marketplace/Profile";
 
 function Router() {
   return (
@@ -33,6 +37,10 @@ function Router() {
         <ProtectedRoute path="/categories" component={Categories} />
         <ProtectedRoute path="/dataset/:id" component={Dataset} />
         <ProtectedRoute path="/category/:name" component={CategoryPage} />
+        <ProtectedRoute path="/cart" component={Cart} />
+        <ProtectedRoute path="/purchases" component={Purchases} />
+        <ProtectedRoute path="/api-key" component={ApiKey} />
+        <ProtectedRoute path="/profile" component={Profile} />
         
         {/* 404 page */}
         <Route component={NotFound} />
