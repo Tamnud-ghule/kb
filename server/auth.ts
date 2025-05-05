@@ -12,7 +12,21 @@ import { v4 as uuidv4 } from "uuid";
 
 declare global {
   namespace Express {
-    interface User extends User {}
+    // Extend the Express User interface with our User properties
+    interface User {
+      id: number;
+      email: string;
+      username: string;
+      password: string;
+      firstName?: string;
+      lastName?: string;
+      company?: string;
+      role?: string;
+      createdAt: Date;
+      updatedAt: Date;
+      isAdmin: boolean;
+      apiKey?: string;
+    }
   }
 }
 
@@ -55,7 +69,7 @@ export function setupAuth(app: Express) {
   passport.use(
     new LocalStrategy(
       { usernameField: "email" },
-      async (email, password, done) => {
+      async (email: string, password: string, done: any) => {
         try {
           const [user] = await db
             .select()
@@ -130,7 +144,7 @@ export function setupAuth(app: Express) {
 
   // Login route
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: any, user: Express.User | false, info: any) => {
       if (err) return next(err);
       if (!user) {
         return res.status(401).json({ error: "Invalid email or password" });

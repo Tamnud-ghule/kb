@@ -35,7 +35,7 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   
   constructor() {
     // Create the session store with the database connection
