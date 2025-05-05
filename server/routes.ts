@@ -1,15 +1,294 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { Express, Request, Response, NextFunction } from "express";
+import { createServer, Server } from "http";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
+import { db } from "./db";
+import { datasets, cartItems, purchases } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import CryptoJS from "crypto-js";
+
+// Secret for encryption (should be stored securely in production)
+const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "your-secret-key";
+
+// Helper function to generate a secure encryption key
+function generateEncryptionKey(): string {
+  const randomKey = CryptoJS.lib.WordArray.random(32).toString();
+  return randomKey;
+}
+
+// Helper to encrypt file content using a key
+export function encryptFileContent(content: string, key: string): string {
+  return CryptoJS.AES.encrypt(content, key).toString();
+}
+
+// Helper to decrypt file content using a key
+export function decryptFileContent(encryptedContent: string, key: string): string {
+  const bytes = CryptoJS.AES.decrypt(encryptedContent, key);
+  return bytes.toString(CryptoJS.enc.Utf8);
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  // Set up authentication routes and middleware
+  setupAuth(app);
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  // Contact form submission
+  app.post("/api/contact", async (req, res, next) => {
+    try {
+      const contactData = req.body;
+      
+      const contactRequest = await storage.createContactRequest(contactData);
+      res.status(201).json({
+        success: true,
+        message: "Your request has been submitted successfully.",
+        id: contactRequest.id
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
 
+  // Get all datasets
+  app.get("/api/datasets", async (req, res, next) => {
+    try {
+      const allDatasets = await db.select().from(datasets);
+      res.json(allDatasets);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get dataset by ID
+  app.get("/api/datasets/:id", async (req, res, next) => {
+    try {
+      const id = parseInt(req.params.id);
+      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, id));
+      
+      if (!dataset) {
+        return res.status(404).json({ error: "Dataset not found" });
+      }
+      
+      res.json(dataset);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Cart routes (requires authentication)
+  app.get("/api/cart", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const items = await storage.getCartItems(req.user.id);
+      res.json(items);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/cart", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const { datasetId } = req.body;
+      
+      if (!datasetId) {
+        return res.status(400).json({ error: "Missing datasetId" });
+      }
+      
+      // Check if dataset exists
+      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, datasetId));
+      
+      if (!dataset) {
+        return res.status(404).json({ error: "Dataset not found" });
+      }
+      
+      // Add to cart
+      const cartItem = await storage.addToCart(req.user.id, datasetId);
+      res.status(201).json(cartItem);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/cart/:datasetId", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const datasetId = parseInt(req.params.datasetId);
+      await storage.removeFromCart(req.user.id, datasetId);
+      res.status(200).json({ message: "Item removed from cart" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Process purchase
+  app.post("/api/purchase", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      // In a real application, integrate with Stripe or another payment processor
+      // For now, we'll simulate a successful purchase
+      
+      // Get cart items
+      const cartItems = await storage.getCartItems(req.user.id);
+      
+      if (cartItems.length === 0) {
+        return res.status(400).json({ error: "Cart is empty" });
+      }
+      
+      // Process each item
+      const purchases = [];
+      
+      for (const { item, dataset } of cartItems) {
+        // Generate encryption key for the dataset
+        const encryptionKey = generateEncryptionKey();
+        
+        // Create purchase record
+        const purchase = await storage.createPurchase(
+          req.user.id,
+          dataset.id,
+          dataset.price, // Use actual price from dataset
+          encryptionKey
+        );
+        
+        purchases.push({
+          dataset,
+          purchase,
+          encryptionKey
+        });
+      }
+      
+      // Clear the cart
+      await storage.clearCart(req.user.id);
+      
+      res.status(201).json({
+        success: true,
+        message: "Purchase completed successfully",
+        purchases: purchases.map(p => ({
+          datasetId: p.dataset.id,
+          title: p.dataset.title,
+          price: p.dataset.price,
+          encryptionKey: p.encryptionKey
+        }))
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get user purchases
+  app.get("/api/purchases", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const purchases = await storage.getUserPurchases(req.user.id);
+      
+      // Don't send the encryption key in the list view
+      const safeData = purchases.map(({ purchase, dataset }) => ({
+        id: purchase.id,
+        datasetId: dataset.id,
+        title: dataset.title,
+        purchaseDate: purchase.purchaseDate,
+        price: purchase.amount
+      }));
+      
+      res.json(safeData);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get purchase details with encryption key
+  app.get("/api/purchases/:datasetId", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const datasetId = parseInt(req.params.datasetId);
+      
+      // Get the purchase
+      const purchase = await storage.getPurchase(req.user.id, datasetId);
+      
+      if (!purchase) {
+        return res.status(404).json({ error: "Purchase not found" });
+      }
+      
+      // Get the dataset details
+      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, datasetId));
+      
+      if (!dataset) {
+        return res.status(404).json({ error: "Dataset not found" });
+      }
+      
+      res.json({
+        purchase,
+        dataset
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Download encrypted dataset (assuming filePath exists)
+  app.get("/api/download/:datasetId", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const datasetId = parseInt(req.params.datasetId);
+      
+      // Verify the user has purchased this dataset
+      const purchase = await storage.getPurchase(req.user.id, datasetId);
+      
+      if (!purchase) {
+        return res.status(403).json({ error: "You have not purchased this dataset" });
+      }
+      
+      // Get the dataset details
+      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, datasetId));
+      
+      if (!dataset || !dataset.filePath) {
+        return res.status(404).json({ error: "Dataset file not found" });
+      }
+      
+      // In a real application, this would fetch the actual file
+      // For now, we'll create a simple example
+      const sampleData = [
+        { id: 1, name: "Example 1", value: 100 },
+        { id: 2, name: "Example 2", value: 200 },
+        { id: 3, name: "Example 3", value: 300 },
+      ];
+      
+      // Encrypt the data with the purchase's encryption key
+      const dataString = JSON.stringify(sampleData);
+      const encryptedData = encryptFileContent(dataString, purchase.encryptionKey);
+      
+      // Set headers for download
+      res.setHeader('Content-Type', 'application/octet-stream');
+      res.setHeader('Content-Disposition', `attachment; filename="${dataset.slug}.encrypted"`);
+      
+      // Send the encrypted data
+      res.send(encryptedData);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Create and return HTTP server
   const httpServer = createServer(app);
-
+  
   return httpServer;
 }
