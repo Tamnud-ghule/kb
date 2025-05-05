@@ -42,9 +42,18 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Company</h3>
             <ul className="mt-4 space-y-2">
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">About</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Security & Compliance</a></li>
+              <li><button onClick={() => document.getElementById('security')?.scrollIntoView({ behavior: 'smooth' })} className="text-gray-400 hover:text-white transition-colors">Security & Compliance</button></li>
+              <li><button onClick={() => document.getElementById('industries')?.scrollIntoView({ behavior: 'smooth' })} className="text-gray-400 hover:text-white transition-colors">Industries</button></li>
               <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Careers</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-gray-300 uppercase tracking-wider">Support</h3>
+            <ul className="mt-4 space-y-2">
+              <li><button onClick={() => document.getElementById('faqs')?.scrollIntoView({ behavior: 'smooth' })} className="text-gray-400 hover:text-white transition-colors">FAQs</button></li>
+              <li><button onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })} className="text-gray-400 hover:text-white transition-colors">Contact Us</button></li>
+              <li><a href="/datasets" className="text-gray-400 hover:text-white transition-colors">Data Marketplace</a></li>
+              <li><a href="/auth" className="text-gray-400 hover:text-white transition-colors">Sign In / Register</a></li>
             </ul>
           </div>
           <div>

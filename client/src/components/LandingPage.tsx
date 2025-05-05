@@ -7,7 +7,7 @@ import Navbar from '@/components/landing/Navbar';
 import HeroSection from '@/components/landing/HeroSection';
 import HowItWorks from '@/components/landing/HowItWorks';
 import IndustriesServed from '@/components/landing/IndustriesServed';
-import SampleDatasetPreview from '@/components/landing/SampleDatasetPreview';
+// SampleDatasetPreview removed per user request
 import SecurityCompliance from '@/components/landing/SecurityCompliance';
 import WhyChooseUs from '@/components/landing/WhyChooseUs';
 import FAQs from '@/components/landing/FAQs';
@@ -21,7 +21,6 @@ const LandingPage: React.FC = () => {
       <HeroSection />
       <HowItWorks />
       <IndustriesServed />
-      <SampleDatasetPreview />
       <SecurityCompliance />
       <WhyChooseUs />
       <FAQs />
