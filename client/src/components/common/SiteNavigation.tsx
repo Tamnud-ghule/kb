@@ -68,18 +68,18 @@ const SiteNavigation: React.FC = () => {
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1 px-4">
             <Link href="/">
-              <a className="block text-white hover:text-gray-300">
+              <span className="block text-white hover:text-gray-300 cursor-pointer">
                 Landing Page
-              </a>
+              </span>
             </Link>
             <Link href="/marketplace">
-              <a className="block text-white hover:text-gray-300">
+              <span className="block text-white hover:text-gray-300 cursor-pointer">
                 Data Marketplace
-              </a>
+              </span>
             </Link>
-            <a href="#" className="block text-white hover:text-gray-300">About</a>
-            <a href="#" className="block text-white hover:text-gray-300">Contact</a>
-            <a href="#" className="block text-white hover:text-gray-300">Support</a>
+            <div className="block text-white hover:text-gray-300 cursor-pointer">About</div>
+            <div className="block text-white hover:text-gray-300 cursor-pointer">Contact</div>
+            <div className="block text-white hover:text-gray-300 cursor-pointer">Support</div>
           </div>
         </div>
       )}

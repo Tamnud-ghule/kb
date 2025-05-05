@@ -44,9 +44,9 @@ const MarketplaceHeader: React.FC = () => {
             <nav className="hidden md:ml-6 md:flex md:space-x-8">
               {navItems.map((item) => (
                 <Link key={item.href} href={item.href}>
-                  <a className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${location === item.href ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
+                  <span className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium cursor-pointer ${location === item.href ? 'border-gray-900 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}>
                     {item.label}
-                  </a>
+                  </span>
                 </Link>
               ))}
             </nav>
@@ -125,11 +125,11 @@ const MarketplaceHeader: React.FC = () => {
         <div className="pt-2 pb-3 space-y-1">
           {navItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <a
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${location === item.href ? 'border-gray-900 text-gray-900 bg-gray-50' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'}`}
+              <span
+                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium cursor-pointer ${location === item.href ? 'border-gray-900 text-gray-900 bg-gray-50' : 'border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700'}`}
               >
                 {item.label}
-              </a>
+              </span>
             </Link>
           ))}
         </div>
