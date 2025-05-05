@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/components/LandingPage";
 import SiteLayout from "@/components/common/SiteLayout";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
+import AuthPage from "@/pages/auth-page";
 
 // Marketplace pages
 import MarketplaceHome from "@/pages/marketplace/Home";
@@ -13,8 +16,6 @@ import Datasets from "@/pages/marketplace/Datasets";
 import Dataset from "@/pages/marketplace/Dataset";
 import CategoryPage from "@/pages/marketplace/CategoryPage";
 import Categories from "@/pages/marketplace/Categories";
-import Login from "@/pages/marketplace/Login";
-import Register from "@/pages/marketplace/Register";
 
 function Router() {
   return (
@@ -23,16 +24,15 @@ function Router() {
         {/* Landing page */}
         <Route path="/" component={LandingPage} />
         
-        {/* Marketplace routes */}
-        <Route path="/marketplace" component={MarketplaceHome} />
-        <Route path="/datasets" component={Datasets} />
-        <Route path="/categories" component={Categories} />
-        <Route path="/dataset/:id" component={Dataset} />
-        <Route path="/category/:name" component={CategoryPage} />
+        {/* Authentication */}
+        <Route path="/auth" component={AuthPage} />
         
-        {/* Authentication routes */}
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
+        {/* Marketplace routes - protected */}
+        <ProtectedRoute path="/marketplace" component={MarketplaceHome} />
+        <ProtectedRoute path="/datasets" component={Datasets} />
+        <ProtectedRoute path="/categories" component={Categories} />
+        <ProtectedRoute path="/dataset/:id" component={Dataset} />
+        <ProtectedRoute path="/category/:name" component={CategoryPage} />
         
         {/* 404 page */}
         <Route component={NotFound} />
@@ -44,10 +44,12 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
