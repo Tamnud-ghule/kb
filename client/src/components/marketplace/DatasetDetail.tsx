@@ -8,272 +8,212 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 const DatasetDetail: React.FC = () => {
-  // In a real implementation, we would fetch the dataset details by ID
-  // For now, we'll use a hard-coded example
-  const [_, params] = useRoute('/dataset/:id');
-  const datasetId = params?.id;
+  // Get the dataset ID from the URL
+  const [match, params] = useRoute('/dataset/:id');
+  const datasetId = params?.id || '1';
 
-  // Mocked dataset details
+  // In a real app, this would fetch the dataset from an API
   const dataset = {
     id: datasetId,
-    title: 'Healthcare Industry Metrics',
-    description: 'Comprehensive healthcare industry data including patient outcomes, costs, and provider metrics. This dataset provides anonymized records covering the past 5 years from over 500 healthcare providers across North America.',
-    category: 'Healthcare',
+    title: 'Enterprise Financial Records Dataset',
+    description: 'Comprehensive financial records from Fortune 500 companies with anonymized identifiers. This dataset contains quarterly financial statements, annual reports, and key performance indicators.',
     price: '$2,499',
-    compliance: ['HIPAA', 'GDPR', 'CCPA'],
-    lastUpdated: 'April 30, 2025',
-    recordCount: '2.3 million',
-    format: 'CSV, JSON',
-    dataFields: [
-      { name: 'provider_id', type: 'string', description: 'Unique identifier for healthcare provider' },
-      { name: 'procedure_code', type: 'string', description: 'Standard medical procedure code' },
-      { name: 'cost', type: 'decimal', description: 'Cost of procedure in USD' },
-      { name: 'patient_outcome', type: 'string', description: 'Categorized outcome of procedure' },
-      { name: 'date', type: 'date', description: 'Date of procedure' },
-      { name: 'region', type: 'string', description: 'Geographic region' },
+    updateFrequency: 'Quarterly',
+    recordCount: '1.2 million',
+    dataFormat: 'CSV, JSON, SQL',
+    compliance: ['GDPR', 'HIPAA', 'SOC 2'],
+    industries: ['Finance', 'Insurance', 'Banking'],
+    lastUpdated: 'May 1, 2025',
+    sampleFields: [
+      { name: 'company_id', type: 'String', description: 'Anonymized company identifier' },
+      { name: 'quarter', type: 'Integer', description: 'Fiscal quarter (1-4)' },
+      { name: 'year', type: 'Integer', description: 'Fiscal year' },
+      { name: 'revenue', type: 'Decimal', description: 'Quarterly revenue in USD' },
+      { name: 'expenses', type: 'Decimal', description: 'Quarterly expenses in USD' },
+      { name: 'profit', type: 'Decimal', description: 'Quarterly profit in USD' },
+      { name: 'assets', type: 'Decimal', description: 'Total assets in USD' },
+      { name: 'liabilities', type: 'Decimal', description: 'Total liabilities in USD' },
+      { name: 'equity', type: 'Decimal', description: 'Total equity in USD' },
     ],
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="text-sm text-gray-500 mb-8">
-          <a href="/" className="hover:text-gray-900">Home</a> {' / '}
-          <a href="/datasets" className="hover:text-gray-900">Datasets</a> {' / '}
-          <a href={`/category/${dataset.category.toLowerCase()}`} className="hover:text-gray-900">{dataset.category}</a> {' / '}
-          <span className="text-gray-700">{dataset.title}</span>
+    <div className="container py-8 px-4 mx-auto max-w-7xl">
+      <div className="flex flex-col md:flex-row justify-between mb-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">{dataset.title}</h1>
+          <p className="text-gray-500 mt-2 text-lg">
+            Dataset ID: {dataset.id}
+          </p>
         </div>
-
-        {/* Dataset Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">{dataset.title}</h1>
-          <div className="flex flex-wrap gap-2 mb-4">
-            {dataset.compliance.map((item, index) => (
-              <Badge key={index} variant="outline" className="bg-gray-100">
-                {item} Compliant
-              </Badge>
-            ))}
-            <Badge variant="outline" className="bg-gray-100">
-              Updated: {dataset.lastUpdated}
-            </Badge>
-          </div>
-          <p className="text-gray-600 mb-6">{dataset.description}</p>
-          <div className="flex flex-wrap gap-4">
-            <Button className="bg-gray-900 text-white">
-              Purchase Dataset
-            </Button>
-            <Button variant="outline">
-              Request Sample
-            </Button>
+        <div className="mt-4 md:mt-0 flex items-start">
+          <div className="text-right">
+            <p className="text-3xl font-bold text-gray-900">{dataset.price}</p>
+            <p className="text-sm text-gray-500">per year, includes updates</p>
           </div>
         </div>
+      </div>
 
-        {/* Dataset Details */}
-        <Tabs defaultValue="overview" className="mb-8">
-          <TabsList className="grid grid-cols-4 w-full max-w-md">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="schema">Schema</TabsTrigger>
-            <TabsTrigger value="sample">Sample</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="overview" className="py-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dataset Overview</CardTitle>
-                <CardDescription>Key information about this dataset</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Category</p>
-                    <p className="text-sm text-gray-500">{dataset.category}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Price</p>
-                    <p className="text-sm text-gray-500">{dataset.price}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Record Count</p>
-                    <p className="text-sm text-gray-500">{dataset.recordCount}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Available Formats</p>
-                    <p className="text-sm text-gray-500">{dataset.format}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Last Updated</p>
-                    <p className="text-sm text-gray-500">{dataset.lastUpdated}</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">Compliance</p>
-                    <p className="text-sm text-gray-500">{dataset.compliance.join(', ')}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="schema" className="py-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Dataset Schema</CardTitle>
-                <CardDescription>Fields and data types included in this dataset</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="border rounded-md overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Field Name</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
-                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+      <div className="flex flex-wrap gap-2 mb-6">
+        {dataset.compliance.map((item) => (
+          <Badge key={item} variant="outline" className="text-xs bg-gray-100">
+            {item} Compliant
+          </Badge>
+        ))}
+        {dataset.industries.map((industry) => (
+          <Badge key={industry} variant="outline" className="text-xs">
+            {industry}
+          </Badge>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Record Count</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{dataset.recordCount}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Update Frequency</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{dataset.updateFrequency}</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg">Last Updated</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-2xl font-bold">{dataset.lastUpdated}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>About this Dataset</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-700">{dataset.description}</p>
+          <Separator className="my-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <h3 className="font-semibold mb-2">Data Format</h3>
+              <p>{dataset.dataFormat}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Access Method</h3>
+              <p>API, Bulk Download, Data Stream</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Tabs defaultValue="schema">
+        <TabsList className="mb-4">
+          <TabsTrigger value="schema">Schema</TabsTrigger>
+          <TabsTrigger value="sample">Sample Data</TabsTrigger>
+          <TabsTrigger value="documentation">Documentation</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="schema">
+          <Card>
+            <CardHeader>
+              <CardTitle>Dataset Schema</CardTitle>
+              <CardDescription>
+                The structure of the data included in this dataset
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Field Name</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Type</th>
+                      <th className="text-left py-3 px-4 font-semibold text-sm">Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dataset.sampleFields.map((field, index) => (
+                      <tr key={field.name} className={index % 2 === 0 ? 'bg-gray-50' : ''}>
+                        <td className="py-3 px-4 border-b border-gray-100 font-mono text-sm">{field.name}</td>
+                        <td className="py-3 px-4 border-b border-gray-100 text-sm">{field.type}</td>
+                        <td className="py-3 px-4 border-b border-gray-100 text-sm">{field.description}</td>
                       </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {dataset.dataFields.map((field, index) => (
-                        <tr key={index}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{field.name}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{field.type}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{field.description}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="sample" className="py-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Sample Data</CardTitle>
-                <CardDescription>Preview of dataset contents (limited to 5 records)</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gray-900 text-gray-100 p-4 rounded-md overflow-auto">
-                  <pre className="text-xs">
-{`[
-  {
-    "provider_id": "HP12345",
-    "procedure_code": "SURG-001",
-    "cost": 2500.00,
-    "patient_outcome": "successful",
-    "date": "2024-02-15",
-    "region": "Northeast"
-  },
-  {
-    "provider_id": "HP67890",
-    "procedure_code": "DIAG-127",
-    "cost": 350.75,
-    "patient_outcome": "follow-up required",
-    "date": "2024-02-16",
-    "region": "Midwest"
-  },
-  {
-    "provider_id": "HP24680",
-    "procedure_code": "PREV-321",
-    "cost": 175.50,
-    "patient_outcome": "successful",
-    "date": "2024-02-17",
-    "region": "South"
-  }
-]`}
-                  </pre>
-                </div>
-                <p className="mt-4 text-xs text-gray-500">Note: This is sample data only. Actual data may vary. Full dataset contains 2.3 million records.</p>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <Button size="sm" variant="outline">
-                  Request Full Sample
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="compliance" className="py-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Compliance Information</CardTitle>
-                <CardDescription>Details about data compliance and security measures</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-medium">HIPAA Compliance</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      All patient data has been properly de-identified according to HIPAA Safe Harbor provisions. No protected health information (PHI) is included in this dataset.
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium">GDPR Compliance</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Data processing agreements are in place with all data sources. All personal identifiers have been removed to ensure GDPR compliance.
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium">CCPA Compliance</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      This dataset adheres to California Consumer Privacy Act requirements. All data collection included proper disclosure and opt-out capabilities.
-                    </p>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium">Security Measures</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      Data is delivered with enterprise-grade encryption. We maintain ISO 27001 certification and undergo regular security audits.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-              <CardFooter className="bg-gray-50 border-t">
-                <Button size="sm" variant="outline">
-                  Download Compliance Documentation
-                </Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-        {/* Related Datasets */}
-        <div className="mb-8">
-          <h2 className="text-xl font-bold mb-4">Related Datasets</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Healthcare Provider Performance</CardTitle>
-                <CardDescription>Provider metrics and ratings</CardDescription>
-              </CardHeader>
-              <CardFooter className="flex justify-between border-t pt-4">
-                <div className="font-medium">$1,899</div>
-                <Button size="sm" variant="outline">View</Button>
-              </CardFooter>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Patient Demographic Trends</CardTitle>
-                <CardDescription>Population health statistics</CardDescription>
-              </CardHeader>
-              <CardFooter className="flex justify-between border-t pt-4">
-                <div className="font-medium">$2,199</div>
-                <Button size="sm" variant="outline">View</Button>
-              </CardFooter>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Insurance Claims Analysis</CardTitle>
-                <CardDescription>Claim processing and outcomes</CardDescription>
-              </CardHeader>
-              <CardFooter className="flex justify-between border-t pt-4">
-                <div className="font-medium">$2,699</div>
-                <Button size="sm" variant="outline">View</Button>
-              </CardFooter>
-            </Card>
-          </div>
-        </div>
+        <TabsContent value="sample">
+          <Card>
+            <CardHeader>
+              <CardTitle>Sample Data</CardTitle>
+              <CardDescription>
+                Preview of the first few records (login required for full access)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="bg-gray-50 p-4 rounded-md">
+                <p className="text-center py-12 text-gray-500">
+                  Please <span className="font-medium text-gray-900">log in</span> to view sample data
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="bg-gray-900 text-white w-full">Purchase Access</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="documentation">
+          <Card>
+            <CardHeader>
+              <CardTitle>Documentation</CardTitle>
+              <CardDescription>
+                Technical documentation and usage examples
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="prose max-w-none">
+                <h3>Usage Examples</h3>
+                <p>
+                  This dataset can be accessed through our secure API or downloaded in bulk.
+                  Examples for connecting with Python, R, and SQL are provided in the
+                  documentation.                
+                </p>
+                <h3>Terms of Use</h3>
+                <p>
+                  This dataset is provided for commercial use with proper licensing.
+                  Redistribution is not permitted without explicit written consent.
+                </p>
+                <h3>Support</h3>
+                <p>
+                  For technical support or questions about this dataset, please contact
+                  our data services team.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+
+      <div className="mt-8 flex justify-end">
+        <Button className="bg-gray-900 text-white px-8">Purchase Access</Button>
       </div>
     </div>
   );

@@ -13,6 +13,8 @@ import Datasets from "@/pages/marketplace/Datasets";
 import Dataset from "@/pages/marketplace/Dataset";
 import CategoryPage from "@/pages/marketplace/CategoryPage";
 import Categories from "@/pages/marketplace/Categories";
+import Login from "@/pages/marketplace/Login";
+import Register from "@/pages/marketplace/Register";
 
 function Router() {
   return (
@@ -27,6 +29,10 @@ function Router() {
         <Route path="/categories" component={Categories} />
         <Route path="/dataset/:id" component={Dataset} />
         <Route path="/category/:name" component={CategoryPage} />
+        
+        {/* Authentication routes */}
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
         
         {/* 404 page */}
         <Route component={NotFound} />
