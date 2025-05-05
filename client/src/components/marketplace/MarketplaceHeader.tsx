@@ -143,7 +143,7 @@ const MarketplaceHeader: React.FC = () => {
           </div>
           <div className="mt-3 px-4">
             <Link href="/login">
-              <Button className="bg-gray-900 text-white hover:bg-gray-800" size="sm" className="w-full">
+              <Button className="bg-gray-900 text-white hover:bg-gray-800 w-full" size="sm">
                 Sign In
               </Button>
             </Link>
