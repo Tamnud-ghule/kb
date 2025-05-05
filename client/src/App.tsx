@@ -13,13 +13,14 @@ import AuthPage from "@/pages/auth-page";
 // Marketplace pages
 import MarketplaceHome from "@/pages/marketplace/Home";
 import Datasets from "@/pages/marketplace/Datasets";
-import Dataset from "@/pages/marketplace/Dataset";
+import Dataset from "@/pages/marketplace/DatasetDetail";
 import CategoryPage from "@/pages/marketplace/CategoryPage";
 import Categories from "@/pages/marketplace/Categories";
 import Cart from "@/pages/marketplace/Cart";
 import Purchases from "@/pages/marketplace/Purchases";
 import ApiKey from "@/pages/marketplace/ApiKey";
 import Profile from "@/pages/marketplace/Profile";
+import Download from "@/pages/marketplace/Download";
 
 function Router() {
   return (
@@ -41,6 +42,7 @@ function Router() {
         <ProtectedRoute path="/purchases" component={Purchases} />
         <ProtectedRoute path="/api-key" component={ApiKey} />
         <ProtectedRoute path="/profile" component={Profile} />
+        <ProtectedRoute path="/download/:id" component={Download} />
         
         {/* 404 page */}
         <Route component={NotFound} />

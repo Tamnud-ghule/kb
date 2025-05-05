@@ -3,7 +3,7 @@ import { createServer, Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { db } from "./db";
-import { datasets, cartItems, purchases } from "@shared/schema";
+import { datasets, cartItems, purchases, categories } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import CryptoJS from "crypto-js";
 
@@ -31,6 +31,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes and middleware
   setupAuth(app);
 
+  // Get all categories
+  app.get("/api/categories", async (req, res, next) => {
+    try {
+      const allCategories = await db.select().from(categories);
+      res.json(allCategories);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get category by slug
+  app.get("/api/categories/:slug", async (req, res, next) => {
+    try {
+      const slug = req.params.slug;
+      const [category] = await db.select().from(categories).where(eq(categories.slug, slug));
+      
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+      
+      res.json(category);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Contact form submission
   app.post("/api/contact", async (req, res, next) => {
     try {
@@ -47,21 +73,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all datasets
+  // Get all datasets with category information
   app.get("/api/datasets", async (req, res, next) => {
     try {
-      const allDatasets = await db.select().from(datasets);
-      res.json(allDatasets);
+      const datasetsWithCategories = await db
+        .select({
+          id: datasets.id,
+          title: datasets.title,
+          slug: datasets.slug,
+          description: datasets.description,
+          price: datasets.price,
+          recordCount: datasets.recordCount,
+          dataFormat: datasets.dataFormat,
+          updateFrequency: datasets.updateFrequency,
+          lastUpdated: datasets.lastUpdated,
+          previewAvailable: datasets.previewAvailable,
+          categoryId: datasets.categoryId,
+          category: {
+            id: categories.id,
+            name: categories.name,
+            slug: categories.slug,
+          },
+        })
+        .from(datasets)
+        .leftJoin(categories, eq(datasets.categoryId, categories.id));
+        
+      res.json(datasetsWithCategories);
     } catch (error) {
       next(error);
     }
   });
 
-  // Get dataset by ID
+  // Get dataset by ID with category information
   app.get("/api/datasets/:id", async (req, res, next) => {
     try {
       const id = parseInt(req.params.id);
-      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, id));
+      
+      const [dataset] = await db
+        .select({
+          id: datasets.id,
+          title: datasets.title,
+          slug: datasets.slug,
+          description: datasets.description,
+          price: datasets.price,
+          recordCount: datasets.recordCount,
+          dataFormat: datasets.dataFormat,
+          updateFrequency: datasets.updateFrequency,
+          lastUpdated: datasets.lastUpdated,
+          previewAvailable: datasets.previewAvailable,
+          categoryId: datasets.categoryId,
+          category: {
+            id: categories.id,
+            name: categories.name,
+            slug: categories.slug,
+          },
+        })
+        .from(datasets)
+        .leftJoin(categories, eq(datasets.categoryId, categories.id))
+        .where(eq(datasets.id, id));
       
       if (!dataset) {
         return res.status(404).json({ error: "Dataset not found" });
