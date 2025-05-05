@@ -185,12 +185,17 @@ export function setupAuth(app: Express) {
     try {
       const newApiKey = generateApiKey();
       
-      await db
+      const [updatedUser] = await db
         .update(users)
         .set({ apiKey: newApiKey, updatedAt: new Date() })
-        .where(eq(users.id, req.user.id));
+        .where(eq(users.id, req.user.id))
+        .returning();
       
-      res.json({ message: "API key regenerated successfully" });
+      // Update the session with the new user data
+      req.login(updatedUser, (err) => {
+        if (err) return next(err);
+        res.json({ apiKey: newApiKey });
+      });
     } catch (error) {
       next(error);
     }
@@ -203,5 +208,44 @@ export function setupAuth(app: Express) {
     }
     
     res.json({ apiKey: req.user.apiKey });
+  });
+  
+  // Update user profile
+  app.patch("/api/user", async (req, res, next) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const { firstName, lastName, company, password } = req.body;
+      const updateData: any = { updatedAt: new Date() };
+      
+      // Only update fields that are provided
+      if (firstName !== undefined) updateData.firstName = firstName;
+      if (lastName !== undefined) updateData.lastName = lastName;
+      if (company !== undefined) updateData.company = company;
+      
+      // If password is provided, hash it
+      if (password) {
+        updateData.password = await hashPassword(password);
+      }
+      
+      // Update user in database
+      const [updatedUser] = await db
+        .update(users)
+        .set(updateData)
+        .where(eq(users.id, req.user.id))
+        .returning();
+      
+      // Update session
+      req.login(updatedUser, (err) => {
+        if (err) return next(err);
+        // Don't return sensitive fields
+        const { password, apiKey, ...userInfo } = updatedUser;
+        res.status(200).json(userInfo);
+      });
+    } catch (error) {
+      next(error);
+    }
   });
 }
