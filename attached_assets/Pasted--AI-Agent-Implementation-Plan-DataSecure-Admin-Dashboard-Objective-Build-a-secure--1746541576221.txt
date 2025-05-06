@@ -1,0 +1,146 @@
+## **AI Agent Implementation Plan: DataSecure Admin Dashboard**
+
+### **Objective**
+
+Build a secure, minimal, internal admin dashboard for DataSecure, accessible only at `/admin` (e.g., kuinbee.com/admin). The admin panel must be strictly separated from the public site and only accessible to authenticated users with the admin role.
+
+---
+
+## **1. Project Structure \& Routing**
+
+- **Framework:** Use React with React Router, or Next.js with its native routing.
+- **All admin code lives under the `/admin` path** (e.g., `/admin/login`, `/admin/dashboard`).
+- **No user-facing components or routes** are included in this codebase.
+
+**Routes to implement:**
+
+- `/admin/login` – Admin login page (public).
+- `/admin/dashboard` – Main admin dashboard (protected).
+
+---
+
+## **2. Authentication \& Access Control**
+
+- **On every protected route**, call `/api/auth/user` to get the current user.
+- **If not authenticated or not an admin**, redirect to `/admin/login`.
+- **RequireAdmin Wrapper**:
+    - Checks authentication and role.
+    - Renders children if authorized, otherwise redirects.
+
+---
+
+## **3. Admin Dashboard Layout**
+
+- **Sidebar Navigation** (left):
+    - Links: Dashboard (and future: Datasets, Categories, Sales, Logout).
+- **Top Bar**:
+    - Branding (e.g., "DataSecure Admin").
+    - Current admin user info.
+    - Logout button.
+- **Main Content Area**:
+    - Displays the selected route’s content.
+- **Styling:**
+    - Use Material UI, Tailwind, or simple CSS for a clean, modern look.
+    - Visually distinct from the public site (refer to branding, but make it clear this is an internal tool).
+
+---
+
+## **4. Core Admin Functions**
+
+**Roles:**
+
+- Only authenticated users with the admin role (as determined by `/api/auth/user`) can access the panel.
+
+**Functions:**
+
+1. **Dataset Management**
+    - Add new datasets (with metadata: name, description, file, category).
+    - Delete datasets.
+    - List/search/filter datasets.
+    - Assign datasets to categories.
+2. **Category Management**
+    - Create, edit, and delete categories.
+    - View all categories.
+3. **Sales Tracking**
+    - View sales/orders (dataset, buyer, price, date).
+    - See total sales and revenue at a glance.
+    - (Optional) Export sales data as CSV.
+4. **Dashboard Overview**
+    - Show summary cards: total datasets, categories, sales, revenue.
+    - Recent activity feed (e.g., latest uploads or sales).
+
+**(No user-facing features or routes are present in this admin panel.)**
+
+---
+
+## **5. Example Directory Structure**
+
+```
+src/
+  admin/
+    components/
+      Sidebar.jsx
+      Topbar.jsx
+      RequireAdmin.jsx
+    pages/
+      login.jsx
+      dashboard.jsx
+    App.jsx
+```
+
+
+---
+
+## **6. Protected Route Logic (Pseudocode)**
+
+```jsx
+// RequireAdmin.jsx
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+export default function RequireAdmin({ children }) {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+
+  useEffect(() =&gt; {
+    fetch('/api/auth/user')
+      .then(res =&gt; res.json())
+      .then(data =&gt; {
+        if (!data || data.role !== 'admin') {
+          navigate('/admin/login');
+        } else {
+          setUser(data);
+        }
+      });
+  }, []);
+
+  if (!user) return &lt;LoadingSpinner /&gt;;
+  return children;
+}
+```
+
+
+---
+
+## **7. Deployment Under `/admin` Path**
+
+- **Next.js:** Place all admin pages/components under `/admin` directory (`/pages/admin` or `/app/admin`).
+- **React:** Use React Router with a basename of `/admin`. Configure your web server (nginx, Vercel, Netlify) to serve the admin build at `/admin`.
+
+---
+
+## **8. Summary Table**
+
+| Route | Purpose | Access Control |
+| :-- | :-- | :-- |
+| /admin/login | Admin login form | Public (redirect if logged in) |
+| /admin/dashboard | Admin dashboard (main page) | Protected (admin only) |
+
+
+---
+
+## **9. Future Expansion (Optional)**
+
+- Add `/admin/datasets`, `/admin/categories`, `/admin/sales` for detailed management, using the same protected route pattern.
+- Expand dashboard analytics as sales and usage grow.
+
