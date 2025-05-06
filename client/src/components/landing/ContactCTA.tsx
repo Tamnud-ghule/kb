@@ -69,7 +69,15 @@ const ContactCTA: React.FC = () => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    contactMutation.mutate(formData);
+    // Make a copy of form data to transform the date properly
+    const submissionData = {...formData};
+    
+    // Convert preferredDate string to a Date object if it exists
+    if (submissionData.preferredDate && typeof submissionData.preferredDate === 'string') {
+      submissionData.preferredDate = new Date(submissionData.preferredDate);
+    }
+    
+    contactMutation.mutate(submissionData);
   };
   
   const handleScheduleCall = () => {

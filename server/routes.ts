@@ -597,6 +597,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Name, email, and message are required fields" });
       }
       
+      // Process and validate dates
+      if (contactData.preferredDate) {
+        // Make sure preferredDate is a valid Date object or string
+        try {
+          // Convert to a Date object and back to ISO string for storage
+          contactData.preferredDate = new Date(contactData.preferredDate);
+        } catch (err) {
+          // If there's an error parsing the date, set it to null
+          contactData.preferredDate = null;
+        }
+      }
+      
       // Create the contact request in the database
       const newContact = await storage.createContactRequest(contactData);
       
@@ -607,6 +619,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         scheduleCall: newContact.scheduleCall
       });
     } catch (error) {
+      console.error("Contact form error:", error);
       next(error);
     }
   });
