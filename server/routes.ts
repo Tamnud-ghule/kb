@@ -587,6 +587,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Contact request endpoint
+  app.post("/api/contact", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const contactData = req.body;
+      
+      // Validate contact request data
+      if (!contactData.name || !contactData.email || !contactData.message) {
+        return res.status(400).json({ error: "Name, email, and message are required fields" });
+      }
+      
+      // Create the contact request in the database
+      const newContact = await storage.createContactRequest(contactData);
+      
+      // Return success response
+      res.status(201).json({
+        id: newContact.id,
+        message: "Contact request submitted successfully",
+        scheduleCall: newContact.scheduleCall
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Create and return HTTP server
   const httpServer = createServer(app);
   
