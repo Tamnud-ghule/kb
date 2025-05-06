@@ -22,6 +22,14 @@ import ApiKey from "@/pages/marketplace/ApiKey";
 import Profile from "@/pages/marketplace/Profile";
 import Download from "@/pages/marketplace/Download";
 
+// Admin pages
+import AdminLogin from "@/admin/pages/login";
+import AdminDashboard from "@/admin/pages/dashboard";
+import AdminDatasets from "@/admin/pages/datasets";
+import AdminCategories from "@/admin/pages/categories";
+import AdminSales from "@/admin/pages/sales";
+import { RequireAdmin } from "@/admin/components/RequireAdmin";
+
 function Router() {
   return (
     <SiteLayout>
@@ -44,6 +52,21 @@ function Router() {
         <ProtectedRoute path="/api-key" component={ApiKey} />
         <ProtectedRoute path="/profile" component={Profile} />
         <ProtectedRoute path="/download/:id" component={Download} />
+        
+        {/* Admin routes */}
+        <Route path="/admin/login" component={AdminLogin} />
+        <RequireAdmin path="/admin/dashboard" component={AdminDashboard} />
+        <RequireAdmin path="/admin/datasets" component={AdminDatasets} />
+        <RequireAdmin path="/admin/categories" component={AdminCategories} />
+        <RequireAdmin path="/admin/sales" component={AdminSales} />
+        
+        {/* Redirect /admin to dashboard */}
+        <Route path="/admin">
+          {() => {
+            window.location.href = "/admin/dashboard";
+            return null;
+          }}
+        </Route>
         
         {/* 404 page */}
         <Route component={NotFound} />
