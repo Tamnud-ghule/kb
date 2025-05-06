@@ -47,10 +47,10 @@ function SidebarLink({ href, icon, label }: SidebarLinkProps) {
   
   return (
     <Link href={href}>
-      <a className={`flex items-center px-4 py-2.5 rounded-lg transition-colors ${isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}>
+      <div className={`flex items-center px-4 py-2.5 rounded-lg transition-colors cursor-pointer ${isActive ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'}`}>
         <span className="mr-3">{icon}</span>
         <span>{label}</span>
-      </a>
+      </div>
     </Link>
   );
 }

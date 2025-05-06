@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 
 export default function AdminLogin() {
@@ -15,10 +15,11 @@ export default function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
 
   // If already logged in and is admin, redirect to admin dashboard
-  if (user && user.isAdmin) {
-    setLocation("/admin/dashboard");
-    return null;
-  }
+  useEffect(() => {
+    if (user && user.isAdmin) {
+      setLocation("/admin/dashboard");
+    }
+  }, [user, setLocation]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
