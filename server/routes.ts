@@ -461,6 +461,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Dataset not found" });
       }
       
+      // Check if the dataset has any associated purchases
+      const purchaseList = await db.select().from(purchases).where(eq(purchases.datasetId, id));
+      
+      if (purchaseList.length > 0) {
+        return res.status(409).json({
+          error: "Cannot delete dataset that has been purchased. This would break user purchase history.",
+          purchaseCount: purchaseList.length
+        });
+      }
+      
       // Delete the dataset
       await db.delete(datasets).where(eq(datasets.id, id));
       res.status(200).json({ message: "Dataset deleted successfully" });

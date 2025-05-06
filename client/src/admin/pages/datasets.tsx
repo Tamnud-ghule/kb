@@ -95,10 +95,19 @@ export default function AdminDatasets() {
       // Invalidate and refetch datasets
       queryClient.invalidateQueries({ queryKey: ["/api/datasets"] });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      let errorMessage = "Failed to delete dataset";
+      
+      // Handle foreign key constraint errors for purchased datasets
+      if (error.status === 409) {
+        errorMessage = error.message || "Cannot delete dataset that has been purchased by users";
+      } else {
+        errorMessage = error.message || "Failed to delete dataset";
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to delete dataset",
+        description: errorMessage,
         variant: "destructive",
       });
     },
