@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { db } from "./db";
 import { datasets, cartItems, purchases, categories } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { eq, count } from "drizzle-orm";
 import CryptoJS from "crypto-js";
 
 // Secret for encryption (should be stored securely in production)
@@ -356,6 +356,227 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin routes (requires admin authentication)
+  app.get("/api/admin/purchases", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      // Get all purchases with joined dataset and user data
+      const allPurchases = await db
+        .select({
+          id: purchases.id,
+          userId: purchases.userId,
+          datasetId: purchases.datasetId,
+          purchaseDate: purchases.purchaseDate,
+          amount: purchases.amount,
+          status: purchases.status,
+        })
+        .from(purchases);
+      
+      res.json(allPurchases);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Get all datasets (including full details)
+  app.get("/api/admin/datasets", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const allDatasets = await db.select().from(datasets);
+      res.json(allDatasets);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Create dataset
+  app.post("/api/admin/datasets", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const datasetData = req.body;
+      
+      // Generate slug if not provided
+      if (!datasetData.slug) {
+        datasetData.slug = datasetData.title
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+      
+      const [newDataset] = await db.insert(datasets).values(datasetData).returning();
+      res.status(201).json(newDataset);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Update dataset
+  app.put("/api/admin/datasets/:id", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const datasetData = req.body;
+      
+      // Update the dataset
+      const [updatedDataset] = await db
+        .update(datasets)
+        .set(datasetData)
+        .where(eq(datasets.id, id))
+        .returning();
+      
+      if (!updatedDataset) {
+        return res.status(404).json({ error: "Dataset not found" });
+      }
+      
+      res.json(updatedDataset);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Delete dataset
+  app.delete("/api/admin/datasets/:id", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Check if dataset exists
+      const [dataset] = await db.select().from(datasets).where(eq(datasets.id, id));
+      if (!dataset) {
+        return res.status(404).json({ error: "Dataset not found" });
+      }
+      
+      // Delete the dataset
+      await db.delete(datasets).where(eq(datasets.id, id));
+      res.status(200).json({ message: "Dataset deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Get all categories
+  app.get("/api/admin/categories", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const allCategories = await db.select().from(categories);
+      res.json(allCategories);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Create category
+  app.post("/api/admin/categories", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const categoryData = req.body;
+      
+      // Generate slug if not provided
+      if (!categoryData.slug) {
+        categoryData.slug = categoryData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+      
+      const [newCategory] = await db.insert(categories).values(categoryData).returning();
+      res.status(201).json(newCategory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Update category
+  app.put("/api/admin/categories/:id", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      const categoryData = req.body;
+      
+      // Update slug if name changed and slug not provided
+      if (categoryData.name && !categoryData.slug) {
+        categoryData.slug = categoryData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-|-$/g, '');
+      }
+      
+      // Update the category
+      const [updatedCategory] = await db
+        .update(categories)
+        .set(categoryData)
+        .where(eq(categories.id, id))
+        .returning();
+      
+      if (!updatedCategory) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+      
+      res.json(updatedCategory);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Delete category
+  app.delete("/api/admin/categories/:id", async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated() || !req.user.isAdmin) {
+      return res.status(403).json({ error: "Admin access required" });
+    }
+    
+    try {
+      const id = parseInt(req.params.id);
+      
+      // Check if category exists
+      const [category] = await db.select().from(categories).where(eq(categories.id, id));
+      if (!category) {
+        return res.status(404).json({ error: "Category not found" });
+      }
+      
+      // Check if there are datasets using this category
+      const datasetCount = await db
+        .select()
+        .from(datasets)
+        .where(eq(datasets.categoryId, id));
+      
+      if (datasetCount.length > 0) {
+        return res.status(400).json({
+          error: "Cannot delete category that has datasets. Reassign datasets first."
+        });
+      }
+      
+      // Delete the category
+      await db.delete(categories).where(eq(categories.id, id));
+      res.status(200).json({ message: "Category deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Create and return HTTP server
   const httpServer = createServer(app);
   
