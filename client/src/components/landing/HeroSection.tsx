@@ -12,17 +12,17 @@ const HeroSection: React.FC = () => {
   
   return (
     <header id="hero" className="relative min-h-screen flex items-center bg-gradient-to-r from-gray-100 to-gray-200">
-      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-gray-900/20"></div>
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 flex flex-col items-center text-center">
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-6">
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-900/10 to-gray-900/20 pointer-events-none"></div>
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 flex flex-col items-center text-center">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-4">
           Enterprise-Grade Data, <br className="hidden sm:block"/>Zero Risk.
         </h1>
-        <p className="text-lg md:text-xl text-gray-700 max-w-3xl mb-10">
+        <p className="text-lg md:text-xl text-gray-700 max-w-3xl mb-6">
           On-demand, fully compliant datasets—collected, validated, encrypted, and delivered by security-first experts.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 mt-2">
           <Link href={user ? "/marketplace" : "/auth"}>
-            <button className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow-sm transition-colors group">
+            <button className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gray-900 hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-500 shadow transition-all group">
               <Database className="h-5 w-5 mr-2" />
               Explore Data Marketplace
               <ArrowRight className="h-4 w-4 ml-2 transform group-hover:translate-x-1 transition-transform" />
@@ -35,7 +35,7 @@ const HeroSection: React.FC = () => {
             </button>
           </Link>
         </div>
-        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-3xl">
           <div className="flex flex-col items-center">
             <div className="w-12 h-12 rounded-full bg-gray-800 text-white flex items-center justify-center text-lg font-semibold mb-4">1</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Browse Datasets</h3>

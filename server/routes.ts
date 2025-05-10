@@ -6,6 +6,7 @@ import { db } from "./db";
 import { datasets, cartItems, purchases, categories } from "@shared/schema";
 import { eq, count } from "drizzle-orm";
 import CryptoJS from "crypto-js";
+import { sendContactNotification } from './utils/email';
 
 // Secret for encryption (should be stored securely in production)
 const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "your-secret-key";
@@ -57,19 +58,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Contact form submission
-  app.post("/api/contact", async (req, res, next) => {
+  // Contact request endpoint
+  app.post("/api/contact", async (req, res) => {
     try {
-      const contactData = req.body;
-      
-      const contactRequest = await storage.createContactRequest(contactData);
+      const { name, email, company, message, preferredDate } = req.body;
+
+      // Validate required fields
+      if (!name || !email || !message) {
+        return res.status(400).json({
+          error: 'Missing required fields',
+          details: {
+            name: !name ? 'Name is required' : undefined,
+            email: !email ? 'Email is required' : undefined,
+            message: !message ? 'Message is required' : undefined,
+          },
+        });
+      }
+
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          error: 'Invalid email format',
+          details: {
+            email: 'Please enter a valid email address',
+          },
+        });
+      }
+
+      // Process and validate date if provided
+      let processedDate = null;
+      if (preferredDate) {
+        const date = new Date(preferredDate);
+        if (isNaN(date.getTime())) {
+          return res.status(400).json({
+            error: 'Invalid date format',
+            details: {
+              preferredDate: 'Please enter a valid date',
+            },
+          });
+        }
+        if (date < new Date()) {
+          return res.status(400).json({
+            error: 'Invalid date',
+            details: {
+              preferredDate: 'Preferred date must be in the future',
+            },
+          });
+        }
+        processedDate = date;
+      }
+
+      // Create contact request
+      const contactRequest = await storage.createContactRequest({
+        name,
+        email,
+        company: company || null,
+        message,
+        preferredDate: processedDate,
+      });
+
+      // Try to send email notification, but don't fail if it doesn't work
+      try {
+        await sendContactNotification(contactRequest);
+      } catch (emailError) {
+        console.error('Failed to send email notification:', emailError);
+        // Continue with the response even if email fails
+      }
+
       res.status(201).json({
         success: true,
-        message: "Your request has been submitted successfully.",
-        id: contactRequest.id
+        message: 'Contact request submitted successfully',
+        data: {
+          id: contactRequest.id,
+        },
       });
     } catch (error) {
-      next(error);
+      console.error('Error in contact endpoint:', {
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined,
+        requestBody: req.body,
+        env: {
+          DATABASE_URL: process.env.DATABASE_URL ? 'set' : 'missing',
+          SMTP_HOST: process.env.SMTP_HOST ? 'set' : 'missing',
+          SMTP_USER: process.env.SMTP_USER ? 'set' : 'missing',
+          SMTP_PASS: process.env.SMTP_PASS ? 'set' : 'missing',
+          SMTP_FROM: process.env.SMTP_FROM ? 'set' : 'missing',
+          CONTACT_NOTIFICATION_EMAIL: process.env.CONTACT_NOTIFICATION_EMAIL ? 'set' : 'missing',
+        }
+      });
+      res.status(500).json({
+        error: 'Failed to submit contact request',
+        details: error instanceof Error ? error.message : 'Unknown error occurred',
+      });
     }
   });
 
@@ -583,43 +664,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.delete(categories).where(eq(categories.id, id));
       res.status(200).json({ message: "Category deleted successfully" });
     } catch (error) {
-      next(error);
-    }
-  });
-  
-  // Contact request endpoint
-  app.post("/api/contact", async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const contactData = req.body;
-      
-      // Validate contact request data
-      if (!contactData.name || !contactData.email || !contactData.message) {
-        return res.status(400).json({ error: "Name, email, and message are required fields" });
-      }
-      
-      // Process and validate dates
-      if (contactData.preferredDate) {
-        // Make sure preferredDate is a valid Date object or string
-        try {
-          // Convert to a Date object and back to ISO string for storage
-          contactData.preferredDate = new Date(contactData.preferredDate);
-        } catch (err) {
-          // If there's an error parsing the date, set it to null
-          contactData.preferredDate = null;
-        }
-      }
-      
-      // Create the contact request in the database
-      const newContact = await storage.createContactRequest(contactData);
-      
-      // Return success response
-      res.status(201).json({
-        id: newContact.id,
-        message: "Contact request submitted successfully",
-        scheduleCall: newContact.scheduleCall
-      });
-    } catch (error) {
-      console.error("Contact form error:", error);
       next(error);
     }
   });

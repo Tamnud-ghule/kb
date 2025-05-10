@@ -38,8 +38,8 @@ const SiteNavigation: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">
             <Link href="/">
-              <span className={`text-sm hover:text-gray-300 cursor-pointer ${location === '/' ? 'font-medium' : ''}`}>
-                Landing Page
+              <span className="text-2xl font-bold font-mont tracking-tight text-white hover:text-gray-300 cursor-pointer">
+                Kuinbee
               </span>
             </Link>
             <Link href="/marketplace">
@@ -50,9 +50,19 @@ const SiteNavigation: React.FC = () => {
           </div>
           
           <div className="hidden md:flex items-center space-x-4 text-sm">
-            <Link href="/#about" className="hover:text-gray-300">About</Link>
-            <Link href="/#contact" className="hover:text-gray-300">Contact</Link>
-            <Link href="/#faq" className="hover:text-gray-300">FAQ</Link>
+            {location === '/' ? (
+              <>
+                <a href="#about" className="hover:text-gray-300">About</a>
+                <a href="#contact" className="hover:text-gray-300">Contact</a>
+                <a href="#faq" className="hover:text-gray-300">FAQ</a>
+              </>
+            ) : (
+              <>
+                <a href="/#about" className="hover:text-gray-300">About</a>
+                <a href="/#contact" className="hover:text-gray-300">Contact</a>
+                <a href="/#faq" className="hover:text-gray-300">FAQ</a>
+              </>
+            )}
             
             {user ? (
               <div className="flex items-center space-x-4">
@@ -136,31 +146,24 @@ const SiteNavigation: React.FC = () => {
       {mobileMenuOpen && (
         <div className="md:hidden">
           <div className="pt-2 pb-3 space-y-1 px-4">
-            <Link href="/">
-              <span className="block text-white hover:text-gray-300 cursor-pointer">
-                Landing Page
-              </span>
-            </Link>
             <Link href="/marketplace">
               <span className="block text-white hover:text-gray-300 cursor-pointer">
                 Data Marketplace
               </span>
             </Link>
-            <Link href="/#about">
-              <span className="block text-white hover:text-gray-300 cursor-pointer">
-                About
-              </span>
-            </Link>
-            <Link href="/#contact">
-              <span className="block text-white hover:text-gray-300 cursor-pointer">
-                Contact
-              </span>
-            </Link>
-            <Link href="/#faq">
-              <span className="block text-white hover:text-gray-300 cursor-pointer">
-                FAQ
-              </span>
-            </Link>
+            {location === '/' ? (
+              <>
+                <a href="#about" className="block text-white hover:text-gray-300 cursor-pointer">About</a>
+                <a href="#contact" className="block text-white hover:text-gray-300 cursor-pointer">Contact</a>
+                <a href="#faq" className="block text-white hover:text-gray-300 cursor-pointer">FAQ</a>
+              </>
+            ) : (
+              <>
+                <a href="/#about" className="block text-white hover:text-gray-300 cursor-pointer">About</a>
+                <a href="/#contact" className="block text-white hover:text-gray-300 cursor-pointer">Contact</a>
+                <a href="/#faq" className="block text-white hover:text-gray-300 cursor-pointer">FAQ</a>
+              </>
+            )}
             
             {user ? (
               <>

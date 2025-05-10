@@ -20,12 +20,17 @@ const ContactCTA: React.FC = () => {
     preferredDate: undefined
   });
   
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showCallOptions, setShowCallOptions] = useState(false);
   const [showForm, setShowForm] = useState(false);
   
   const contactMutation = useMutation({
     mutationFn: async (data: Omit<InsertContactRequest, 'id'>) => {
       const res = await apiRequest('POST', '/api/contact', data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to send message');
+      }
       return await res.json();
     },
     onSuccess: () => {
@@ -36,7 +41,7 @@ const ContactCTA: React.FC = () => {
           : "Thank you for your message. Our team will get back to you soon.",
       });
       
-      // Reset form
+      // Reset form and errors
       setFormData({ 
         name: '',
         email: '',
@@ -45,19 +50,36 @@ const ContactCTA: React.FC = () => {
         scheduleCall: false,
         preferredDate: undefined
       });
+      setErrors({});
       setShowForm(false);
     },
     onError: (error: any) => {
-      toast({
-        title: "Error sending message",
-        description: error.message || "Please try again later.",
-        variant: "destructive",
-      });
+      // Handle field-specific errors
+      if (error.details) {
+        setErrors(error.details);
+      } else if (error.field) {
+        setErrors({ [error.field]: error.error });
+      } else {
+        toast({
+          title: "Error sending message",
+          description: error.message || "Please try again later.",
+          variant: "destructive",
+        });
+      }
     },
   });
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target as HTMLInputElement;
+    
+    // Clear error for the field being changed
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
     
     if (type === 'checkbox') {
       const { checked } = e.target as HTMLInputElement;
@@ -69,6 +91,8 @@ const ContactCTA: React.FC = () => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({}); // Clear all errors on new submission
+    
     // Make a copy of form data to transform the date properly
     const submissionData = {...formData};
     
@@ -139,10 +163,13 @@ const ContactCTA: React.FC = () => {
                     value={formData.name}
                     onChange={handleInputChange}
                     required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    className={`block w-full pl-10 pr-3 py-2 border ${errors.name ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500`}
                     placeholder="Full Name"
                   />
                 </div>
+                {errors.name && (
+                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -158,10 +185,13 @@ const ContactCTA: React.FC = () => {
                     value={formData.email}
                     onChange={handleInputChange}
                     required
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    className={`block w-full pl-10 pr-3 py-2 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500`}
                     placeholder="you@company.com"
                   />
                 </div>
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                )}
               </div>
               
               <div className="space-y-2">
@@ -176,10 +206,13 @@ const ContactCTA: React.FC = () => {
                     name="company"
                     value={formData.company || ''}
                     onChange={handleInputChange}
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                    className={`block w-full pl-10 pr-3 py-2 border ${errors.company ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500`}
                     placeholder="Your Organization"
                   />
                 </div>
+                {errors.company && (
+                  <p className="mt-1 text-sm text-red-600">{errors.company}</p>
+                )}
               </div>
               
               {showCallOptions && (
@@ -195,9 +228,12 @@ const ContactCTA: React.FC = () => {
                       name="preferredDate"
                       value={formData.preferredDate?.toString() || ''}
                       onChange={handleInputChange}
-                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                      className={`block w-full pl-10 pr-3 py-2 border ${errors.preferredDate ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500`}
                     />
                   </div>
+                  {errors.preferredDate && (
+                    <p className="mt-1 text-sm text-red-600">{errors.preferredDate}</p>
+                  )}
                 </div>
               )}
               
@@ -210,9 +246,12 @@ const ContactCTA: React.FC = () => {
                   value={formData.message}
                   onChange={handleInputChange}
                   required
-                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500"
+                  className={`block w-full px-3 py-2 border ${errors.message ? 'border-red-300' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-gray-500 focus:border-gray-500`}
                   placeholder={showCallOptions ? "Please tell us about your data needs and any specific topics you'd like to discuss." : "How can we help you?"}
                 ></textarea>
+                {errors.message && (
+                  <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                )}
               </div>
               
               <div className="flex justify-between pt-2">

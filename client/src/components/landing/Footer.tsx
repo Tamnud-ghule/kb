@@ -10,7 +10,7 @@ const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           <div className="md:col-span-2">
-            <span className="text-2xl font-bold">DataSecure</span>
+            <span className="text-2xl font-bold font-mont">DataSecure</span>
             <p className="mt-2 text-gray-400 max-w-md">
               Enterprise-grade data solutions with uncompromising security and compliance.
             </p>

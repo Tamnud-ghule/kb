@@ -3,7 +3,7 @@
  * Renders all section components in sequence for a complete, responsive landing page
  */
 import React from 'react';
-import Navbar from '@/components/landing/Navbar';
+import SiteLayout from '@/components/common/SiteLayout';
 import HeroSection from '@/components/landing/HeroSection';
 import HowItWorks from '@/components/landing/HowItWorks';
 import IndustriesServed from '@/components/landing/IndustriesServed';
@@ -16,8 +16,7 @@ import Footer from '@/components/landing/Footer';
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen flex flex-col antialiased">
-      <Navbar />
+    <>
       <HeroSection />
       <HowItWorks />
       <IndustriesServed />
@@ -26,7 +25,7 @@ const LandingPage: React.FC = () => {
       <FAQs />
       <ContactCTA />
       <Footer />
-    </div>
+    </>
   );
 };
 
