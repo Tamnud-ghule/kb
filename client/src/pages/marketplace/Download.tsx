@@ -219,18 +219,19 @@ export default function Download() {
           </div>
           
           <div className="rounded-lg bg-blue-50 p-4 border border-blue-100">
-            <h3 className="text-lg font-medium text-blue-800 mb-2">Decryption Instructions</h3>
+            <h3 className="text-lg font-medium text-blue-800 mb-2">How to Open Your Dataset</h3>
             <ol className="list-decimal list-inside space-y-2 text-blue-700">
-              <li>Download the encrypted dataset using the button below</li>
-              <li>Copy your encryption key from above</li>
-              <li>Use our decryption tools in your preferred environment</li>
+              <li>Download the ZIP file using the button below.</li>
+              <li>Copy your encryption key from above (this is your ZIP password).</li>
               <li>
-                <Link href="/api-key" className="text-blue-600 underline flex items-center inline-block">
-                  Get your API key for programmatic access
-                  <ExternalLink className="h-3 w-3 ml-1" />
-                </Link>
+                Open the ZIP file using <a href="https://www.7-zip.org/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">7-Zip</a> (recommended, free, open source) or any tool that supports AES-256 encrypted ZIPs.
               </li>
+              <li>When prompted, paste your encryption key as the password to extract the dataset file.</li>
+              <li>Open the extracted file in your preferred application (Excel, etc.).</li>
             </ol>
+            <div className="mt-3 text-xs text-blue-600">
+              <b>Note:</b> Windows built-in ZIP may not support AES-256. Use 7-Zip for best results.
+            </div>
           </div>
         </CardContent>
         

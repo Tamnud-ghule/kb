@@ -7,6 +7,10 @@ import { datasets, cartItems, purchases, categories } from "@shared/schema";
 import { eq, count } from "drizzle-orm";
 import CryptoJS from "crypto-js";
 import { sendContactNotification } from './utils/email';
+import path from 'path';
+import fs from 'fs';
+import { execFile } from 'child_process';
+import { path7za } from '7zip-bin';
 
 // Secret for encryption (should be stored securely in production)
 const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "your-secret-key";
@@ -391,48 +395,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Download encrypted dataset (assuming filePath exists)
+  // Download encrypted dataset (as password-protected ZIP)
   app.get("/api/download/:datasetId", async (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated()) {
       return res.status(401).json({ error: "Not authenticated" });
     }
-    
     try {
       const datasetId = parseInt(req.params.datasetId);
-      
-      // Verify the user has purchased this dataset
       const purchase = await storage.getPurchase(req.user.id, datasetId);
-      
       if (!purchase) {
         return res.status(403).json({ error: "You have not purchased this dataset" });
       }
-      
-      // Get the dataset details
       const [dataset] = await db.select().from(datasets).where(eq(datasets.id, datasetId));
-      
       if (!dataset || !dataset.filePath) {
         return res.status(404).json({ error: "Dataset file not found" });
       }
-      
-      // In a real application, this would fetch the actual file
-      // For now, we'll create a simple example
-      const sampleData = [
-        { id: 1, name: "Example 1", value: 100 },
-        { id: 2, name: "Example 2", value: 200 },
-        { id: 3, name: "Example 3", value: 300 },
-      ];
-      
-      // Encrypt the data with the purchase's encryption key
-      const dataString = JSON.stringify(sampleData);
-      const encryptedData = encryptFileContent(dataString, purchase.encryptionKey);
-      
-      // Set headers for download
-      res.setHeader('Content-Type', 'application/octet-stream');
-      res.setHeader('Content-Disposition', `attachment; filename="${dataset.slug}.encrypted"`);
-      
-      // Send the encrypted data
-      res.send(encryptedData);
+      const filePath = path.join(__dirname, dataset.filePath.startsWith('/') ? `..${dataset.filePath}` : dataset.filePath);
+      if (!fs.existsSync(filePath)) {
+        return res.status(404).json({ error: "Dataset file does not exist on server" });
+      }
+      const zipFileName = `${dataset.slug}-${Date.now()}.zip`;
+      const zipFilePath = path.join(__dirname, '../tmp', zipFileName);
+      fs.mkdirSync(path.dirname(zipFilePath), { recursive: true });
+      // Create the ZIP file with error logging
+      try {
+        await new Promise((resolve, reject) => {
+          execFile(
+            path7za,
+            [
+              'a',
+              '-tzip',
+              `-p${purchase.encryptionKey}`,
+              '-mem=AES256',
+              zipFilePath,
+              filePath
+            ],
+            (err, stdout, stderr) => {
+              if (err) {
+                console.error('7-Zip error:', stderr || stdout || err);
+                reject(stderr || stdout || err);
+              } else {
+                resolve();
+              }
+            }
+          );
+        });
+      } catch (zipError) {
+        console.error('Failed to create ZIP file:', zipError);
+        return res.status(500).json({ error: 'Failed to create ZIP file', details: zipError.toString() });
+      }
+      // Stream the ZIP file with robust cleanup
+      res.setHeader('Content-Type', 'application/zip');
+      res.setHeader('Content-Disposition', `attachment; filename="${dataset.slug}.zip"`);
+      const readStream = fs.createReadStream(zipFilePath);
+      let cleanup = () => {
+        fs.unlink(zipFilePath, (err) => {
+          if (err) console.error('Failed to delete temp ZIP file:', err);
+        });
+      };
+      readStream.on('error', (err) => {
+        console.error('Read stream error:', err);
+        cleanup();
+        res.end();
+      });
+      res.on('close', cleanup);
+      res.on('finish', cleanup);
+      readStream.pipe(res);
     } catch (error) {
+      console.error('Download route error:', error);
       next(error);
     }
   });
