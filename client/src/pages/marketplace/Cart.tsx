@@ -120,9 +120,19 @@ export default function Cart() {
 
   return (
     <div className="container max-w-6xl mx-auto py-12 px-4">
+      {/* Beta Notice Banner */}
+      <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-6 py-4 rounded-lg mb-6">
+        <h2 className="text-lg font-semibold">Beta Version Notice</h2>
+        <p className="mt-1">
+          This is a beta version of the app. No real payments are processed.
+          The datasets you're downloading are sample files for demonstration purposes.
+        </p>
+      </div>
+      
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
       </div>
+
 
       {cartItems && cartItems.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-3">

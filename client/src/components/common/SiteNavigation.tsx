@@ -54,13 +54,13 @@ const SiteNavigation: React.FC = () => {
               <>
                 <a href="#about" className="hover:text-gray-300">About</a>
                 <a href="#contact" className="hover:text-gray-300">Contact</a>
-                <a href="#faq" className="hover:text-gray-300">FAQ</a>
+                <a href="#faqs" className="hover:text-gray-300">FAQ</a>
               </>
             ) : (
               <>
                 <a href="/#about" className="hover:text-gray-300">About</a>
                 <a href="/#contact" className="hover:text-gray-300">Contact</a>
-                <a href="/#faq" className="hover:text-gray-300">FAQ</a>
+                <a href="/#faqs" className="hover:text-gray-300">FAQ</a>
               </>
             )}
             

@@ -10,7 +10,13 @@ import { sendContactNotification } from './utils/email';
 import path from 'path';
 import fs from 'fs';
 import { execFile } from 'child_process';
-import { path7za } from '7zip-bin';
+import { path7za } from "7zip-bin";
+// Add missing ES Module __dirname emulation
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log("7-Zip binary path:", path7za);
 
 // Secret for encryption (should be stored securely in production)
 const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "your-secret-key";
@@ -410,44 +416,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!dataset || !dataset.filePath) {
         return res.status(404).json({ error: "Dataset file not found" });
       }
-      const filePath = path.join(__dirname, dataset.filePath.startsWith('/') ? `..${dataset.filePath}` : dataset.filePath);
+      const filePath = path.join(__dirname, dataset.filePath.replace(/^\//, ""));
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ error: "Dataset file does not exist on server" });
       }
       const zipFileName = `${dataset.slug}-${Date.now()}.zip`;
-      const zipFilePath = path.join(__dirname, '../tmp', zipFileName);
-      fs.mkdirSync(path.dirname(zipFilePath), { recursive: true });
-      // Create the ZIP file with error logging
-      try {
-        await new Promise((resolve, reject) => {
-          execFile(
-            path7za,
-            [
-              'a',
-              '-tzip',
-              `-p${purchase.encryptionKey}`,
-              '-mem=AES256',
-              zipFilePath,
-              filePath
-            ],
-            (err, stdout, stderr) => {
-              if (err) {
-                console.error('7-Zip error:', stderr || stdout || err);
-                reject(stderr || stdout || err);
-              } else {
-                resolve();
-              }
-            }
-          );
-        });
-      } catch (zipError) {
-        console.error('Failed to create ZIP file:', zipError);
-        return res.status(500).json({ error: 'Failed to create ZIP file', details: zipError.toString() });
+const zipFilePath = path.join(__dirname, '../tmp', zipFileName);
+
+try {
+  await new Promise((resolve, reject) => {
+    execFile(
+      path7za,
+      [
+        'a',
+        '-tzip',                // ZIP format
+        `-p${purchase.encryptionKey}`,  // Encryption key
+        '-mem=AES256',          // Encryption method
+        zipFilePath,            // Output path
+        filePath                // CSV file to compress
+      ],
+      (err, stdout, stderr) => {
+        if (err) {
+          console.error('7-Zip error:', {
+            error: err,
+            stderr,
+            stdout,
+          });
+          return reject(`7-Zip failed: ${stderr || stdout}`);
+        }
+        resolve();
       }
-      // Stream the ZIP file with robust cleanup
-      res.setHeader('Content-Type', 'application/zip');
-      res.setHeader('Content-Disposition', `attachment; filename="${dataset.slug}.zip"`);
-      const readStream = fs.createReadStream(zipFilePath);
+    );
+  });
+} catch (zipError) {
+  console.error('Failed to create ZIP:', zipError);
+  return res.status(500).json({
+    error: 'ZIP creation failed',
+    details: zipError.toString()
+  });
+}
+
+// Confirm ZIP file was created
+if (!fs.existsSync(zipFilePath)) {
+  return res.status(500).json({
+    error: 'ZIP file was not created'
+  });
+}
+
+// Send response with correct filename
+res.setHeader('Content-Type', 'application/zip');
+res.setHeader('Content-Disposition', `attachment; filename="${zipFileName}"`);
+const readStream = fs.createReadStream(zipFilePath);
       let cleanup = () => {
         fs.unlink(zipFilePath, (err) => {
           if (err) console.error('Failed to delete temp ZIP file:', err);
